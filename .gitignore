@@ -1,0 +1,19 @@
+# ROS 2 colcon
+build/
+install/
+log/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+
+# IDE / OS
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Simulator (clone separately — see SETUP.md)
+src/eeUVsim_Gazebo/

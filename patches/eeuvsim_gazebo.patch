@@ -1,0 +1,118 @@
+diff --git a/eeuv_sim/CMakeLists.txt b/eeuv_sim/CMakeLists.txt
+index 7c18fed..94c738d 100644
+--- a/eeuv_sim/CMakeLists.txt
++++ b/eeuv_sim/CMakeLists.txt
+@@ -15,14 +15,8 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+ endif()
+ 
+ find_package(ament_cmake REQUIRED)
+-find_package(control_msgs REQUIRED)
+-find_package(geometry_msgs REQUIRED)
+-find_package(rclcpp REQUIRED)
+-find_package(rclcpp_action REQUIRED)
+-find_package(std_msgs REQUIRED)
+ find_package(ament_cmake_python REQUIRED)
+ find_package(rclpy REQUIRED)
+-find_package(eeuv_sim_interfaces)
+ 
+ install(DIRECTORY
+   launch
+diff --git a/eeuv_sim/package.xml b/eeuv_sim/package.xml
+index c79939b..f623052 100644
+--- a/eeuv_sim/package.xml
++++ b/eeuv_sim/package.xml
+@@ -12,29 +12,19 @@
+ 
+   <buildtool_depend>ament_cmake</buildtool_depend>
+ 
+-  <build_depend>control_msgs</build_depend>
+-  <build_depend>geometry_msgs</build_depend>
+-  <build_depend>rclcpp</build_depend>
+-  <build_depend>rclcpp_action</build_depend>
+-  <build_depend>std_msgs</build_depend>
++  <build_depend>rclpy</build_depend>
+ 
+   <exec_depend>ament_index_python</exec_depend>
+-  <exec_depend>control_msgs</exec_depend>
+-  <exec_depend>effort_controllers</exec_depend>
+-  <exec_depend>geometry_msgs</exec_depend>
+-  <exec_depend>gazebo_ros2_control</exec_depend>
++  <exec_depend>eeuv_sim_interfaces</exec_depend>
++  <exec_depend>gazebo_msgs</exec_depend>
+   <exec_depend>gazebo_ros</exec_depend>
+-  <exec_depend>hardware_interface</exec_depend>
+-  <exec_depend>joint_trajectory_controller</exec_depend>
+-  <exec_depend>joint_state_controller</exec_depend>
++  <exec_depend>geometry_msgs</exec_depend>
+   <exec_depend>launch</exec_depend>
+   <exec_depend>launch_ros</exec_depend>
+   <exec_depend>robot_state_publisher</exec_depend>
+-  <exec_depend>ros2_control</exec_depend>
+-  <exec_depend>ros2_controllers</exec_depend>
+-  <exec_depend>rclcpp</exec_depend>
++  <exec_depend>rclpy</exec_depend>
+   <exec_depend>std_msgs</exec_depend>
+-  <exec_depend>velocity_controllers</exec_depend>
++  <exec_depend>tf_transformations</exec_depend>
+   <exec_depend>xacro</exec_depend>
+ 
+   <test_depend>ament_cmake_gtest</test_depend>
+diff --git a/eeuv_sim/scripts/AUVMotion.py b/eeuv_sim/scripts/AUVMotion.py
+index 62e3f4a..1f1368d 100755
+--- a/eeuv_sim/scripts/AUVMotion.py
++++ b/eeuv_sim/scripts/AUVMotion.py
+@@ -11,6 +11,10 @@ from rclpy.node import Node
+ from rclpy import Future
+ from ament_index_python.packages import get_package_share_directory
+ 
++import sys
++import os
++sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
++
+ from std_msgs.msg import Bool, Float32
+ from gazebo_msgs.srv import SetEntityState, SpawnEntity, DeleteEntity
+ from gazebo_msgs.msg import EntityState
+@@ -87,7 +91,7 @@ class AUVMotion(Node):
+         self.default_dynamics_parameters = self.dynamics_parameters.copy()
+         self.dynamics = AUVDynamics(self.dynamics_parameters["dynamics"])
+         self.pos = np.zeros(6)
+-        self.pos[2] = 5.0
++        self.pos[2] = 2.0  # matches Gazebo spawn z = -2.0
+         self.vel = np.zeros(6)
+         self.acc = np.zeros(6)
+         self.U = np.zeros(6)
+@@ -422,7 +426,7 @@ class AUVMotion(Node):
+ 
+     def reset(self):
+         self.pos = np.zeros(6)
+-        self.pos[2] = 5
++        self.pos[2] = 2.0
+ 
+         self.vel = np.zeros(6)
+         self.acc = np.zeros(6)
+diff --git a/eeuv_sim/scripts/actuator/moveFins.py b/eeuv_sim/scripts/actuator/moveFins.py
+index 15b5da0..e4d67a5 100755
+--- a/eeuv_sim/scripts/actuator/moveFins.py
++++ b/eeuv_sim/scripts/actuator/moveFins.py
+@@ -7,6 +7,8 @@ Node to control the joints states on Gazebo
+ """
+ 
+ import sys
++import os
++sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+ import rclpy
+ from rclpy import Future
+ from rclpy.node import Node
+diff --git a/eeuv_sim/scripts/actuator/moveWing.py b/eeuv_sim/scripts/actuator/moveWing.py
+index 0ef42bf..8f7807f 100644
+--- a/eeuv_sim/scripts/actuator/moveWing.py
++++ b/eeuv_sim/scripts/actuator/moveWing.py
+@@ -5,6 +5,8 @@ Script to calculate wing movement for glider AUV in Gazebo
+ @contact: yuya.hamamatsu@taltech.ee
+ """
+ import os
++import sys
++sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+ import yaml
+ import math
+ import numpy as np
